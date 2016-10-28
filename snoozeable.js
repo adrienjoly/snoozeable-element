@@ -348,28 +348,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
   return function(bannerGallery, onSnoozeFct) {
 
     var App = {};
-    App.slideCount = 2;
     App.active = 0;
-
-    /*
-    App.setActive = function (dir) {
-      var dir = dir || 'left',
-        active;
-      if ('left' === dir) {
-        active = ((App.active + 1) < App.slideCount) ? App.active + 1 : 0;
-        if (0 !== active) {
-          App.active = active;
-        }
-      }
-      if ('right' === dir) {
-        active = ((App.active - 1) >= 0) ? App.active - 1 : App.slideCount - 1;
-        if ((App.slideCount - 1) !== active) {
-          App.active = active;
-        }
-      }
-      return App.active;
-    };
-    */
 
     var
       windowChange = new WindowListeners(),
@@ -395,9 +374,8 @@ window.SnoozeSwiper = (function(window, document, undefined){
             // Make sure the swipe distance is less than the swipe time...
             // Or that the swipe distance is greater than the half of the slide width.
             if (offsetDist > time || (dist > (width / 2))) {
-              var prev = App.active,
-                next = 'left' === dir ? 1 : 0; //App.setActive(dir);
-              if (next !== prev) {
+              if ('left' === dir) {
+                var next = App.active + 1;
                 // Animate the gallery slides along...
                 // Only pass the speed property on fast or long swipes, else default to the value set up in the css.
                 bannerGalleryFn.animateSlides(next, ((offsetDist > time) && (dist > (width / 2))) ? speed : false);
@@ -405,7 +383,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
                 onSnoozeFct();
               } else {
                 // Animate the gallery slides back into place.
-                bannerGalleryFn.animateSlides(prev);
+                bannerGalleryFn.animateSlides(App.active);
               }
             } else {
               // Make sure we have actually travelled.

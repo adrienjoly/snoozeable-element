@@ -66,6 +66,32 @@ window.SnoozeSwiper = (function(window, document, undefined){
 
   // === CLASSES ===
 
+  /*
+  * Set the window listeners up, listens to either 'orientationchange' or 'resize' events depending on support.
+  *
+  * @class WindowListeners
+  * @param {Object} opts
+  */
+  WindowListeners = function (opts) {
+    this.opts = opts;
+    this._init();
+  };
+  WindowListeners.prototype.addListener = function (cb) {
+    var self = this;
+    if ('function' === typeof cb) {
+      window.addEventListener(this.listener, cb, false);
+    }
+  };
+  WindowListeners.prototype.removeListener = function (cb) {
+    var self = this;
+    if ('function' === typeof cb) {
+      window.addEventListener(this.listener, cb, false);
+    }
+  };
+  WindowListeners.prototype._init = function () {
+    this.listener = 'onorientationchange' in window ? 'orientationchange' : 'resize';
+    return this;
+  };
 
   /*
   * Set up the ability to listen out to CSS animation and transition events.
@@ -132,33 +158,6 @@ window.SnoozeSwiper = (function(window, document, undefined){
         }
       }
       return App.active;
-    };
-
-    /*
-    * Set the window listeners up, listens to either 'orientationchange' or 'resize' events depending on support.
-    *
-    * @class WindowListeners
-    * @param {Object} opts
-    */
-    App.WindowListeners = function (opts) {
-      this.opts = opts;
-      this._init();
-    };
-    App.WindowListeners.prototype.addListener = function (cb) {
-      var self = this;
-      if ('function' === typeof cb) {
-        window.addEventListener(this.listener, cb, false);
-      }
-    };
-    App.WindowListeners.prototype.removeListener = function (cb) {
-      var self = this;
-      if ('function' === typeof cb) {
-        window.addEventListener(this.listener, cb, false);
-      }
-    };
-    App.WindowListeners.prototype._init = function () {
-      this.listener = 'onorientationchange' in window ? 'orientationchange' : 'resize';
-      return this;
     };
 
     /*
@@ -366,7 +365,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
     };
 
     var
-      windowChange = new App.WindowListeners(),
+      windowChange = new WindowListeners(),
       bannerGalleryFn = new App.GalleryControl({
         element: bannerGallery,
         wrapper: '.gallery-module__wrapper',

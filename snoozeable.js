@@ -356,7 +356,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
         slides: '.gallery-module__slide'
       }),
       swipeListener = new SwipeControl({
-        element: document.body,
+        element: bannerGallery,
         trackingCallback: function (dir, dist, currPos, startPos, time) {
           var self = this;
           if (!bannerGalleryFn.animating) {

@@ -130,7 +130,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
   /*
   * Listen out for swipes.
   *
-  * @class FixGalleryDimensions
+  * @class SwipeControl
   * @param {Object} opts
   */
   SwipeControl = function (opts) {
@@ -233,7 +233,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
   };
 
   /*
-  * Reposition the gallery elements based on the size of the screen.
+  * Reposition the snoozeable elements based on the size of the screen.
   *
   * @class GalleryControl
   * @param {Object} opts
@@ -344,29 +344,29 @@ window.SnoozeSwiper = (function(window, document, undefined){
 
   // === MAIN COMPONENT LOGIC ===
 
-  return function(bannerGallery, onSnoozeFct) {
+  return function(element, onSnoozeFct) {
 
     var active = 0;
 
     var
       windowChange = new WindowListeners(),
-      bannerGalleryFn = new GalleryControl({
-        element: bannerGallery,
-        wrapper: '.gallery-module__wrapper',
-        slides: '.gallery-module__slide'
+      snoozeableControl = new GalleryControl({
+        element: element,
+        wrapper: '.snoozeable-module__wrapper',
+        slides: '.snoozeable-module__slide'
       }),
       swipeListener = new SwipeControl({
-        element: bannerGallery,
+        element: element,
         trackingCallback: function (dir, dist, currPos, startPos, time) {
           var self = this;
-          if (!bannerGalleryFn.animating) {
+          if (!snoozeableControl.animating) {
             // Create a callback to determine whether the user has tracked enough to move onto the next slide.
-            bannerGalleryFn.trackSlides(dir, dist, function callback() { });
+            snoozeableControl.trackSlides(dir, dist, function callback() { });
           }
         },
         swipeSuccessCallback: function (dir, dist, time) {
-          if (!bannerGalleryFn.animating) {
-            var width = bannerGalleryFn.slideWidth,
+          if (!snoozeableControl.animating) {
+            var width = snoozeableControl.slideWidth,
               offsetDist = (dist * 1.66),
               speed = (offsetDist / time) / 10;
             // Make sure the swipe distance is less than the swipe time...
@@ -374,20 +374,20 @@ window.SnoozeSwiper = (function(window, document, undefined){
             if (offsetDist > time || (dist > (width / 2))) {
               if ('left' === dir) {
                 var next = active + 1;
-                // Animate the gallery slides along...
+                // Animate the snoozeable slides along...
                 // Only pass the speed property on fast or long swipes, else default to the value set up in the css.
-                bannerGalleryFn.animateSlides(next, ((offsetDist > time) && (dist > (width / 2))) ? speed : false);
+                snoozeableControl.animateSlides(next, ((offsetDist > time) && (dist > (width / 2))) ? speed : false);
                 // Callback the parent of this component instance
                 onSnoozeFct();
               } else {
-                // Animate the gallery slides back into place.
-                bannerGalleryFn.animateSlides(active);
+                // Animate the snoozeable slides back into place.
+                snoozeableControl.animateSlides(active);
               }
             } else {
               // Make sure we have actually travelled.
               if (10 < dist) {
-                // Animate the gallery slides back into place.
-                bannerGalleryFn.animateSlides(active, null);
+                // Animate the snoozeable slides back into place.
+                snoozeableControl.animateSlides(active, null);
               }
             }
           }
@@ -401,7 +401,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
         clearTimeout(resizeTimer);
       }
       resizeTimer = setTimeout(function () {
-        bannerGalleryFn.fixSlideDimensions(active);
+        snoozeableControl.fixSlideDimensions(active);
       }, 250);
     });
 

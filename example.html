@@ -8,24 +8,24 @@
 <body>
   <h1>CSS3 Animated Snooze</h1>
 
-  <div class="gallery-module">
-    <div class="gallery-module__wrapper">
-      <div class="gallery-module__slide">ITEM 1</div>
-      <div class="gallery-module__slide">SNOOZE</div>
+  <div class="snoozeable-module">
+    <div class="snoozeable-module__wrapper">
+      <div class="snoozeable-module__slide">ITEM 1</div>
+      <div class="snoozeable-module__slide">SNOOZE</div>
     </div>
   </div>
 
-  <div class="gallery-module">
-    <div class="gallery-module__wrapper">
-      <div class="gallery-module__slide">ITEM 2</div>
-      <div class="gallery-module__slide">SNOOZE</div>
+  <div class="snoozeable-module">
+    <div class="snoozeable-module__wrapper">
+      <div class="snoozeable-module__slide">ITEM 2</div>
+      <div class="snoozeable-module__slide">SNOOZE</div>
     </div>
   </div>
 
   <script src="snoozeable.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      var items = document.getElementsByClassName('gallery-module');
+      var items = document.getElementsByClassName('snoozeable-module');
       Array.prototype.forEach.call(items, function(item, i) {
         SnoozeSwiper(item, function onSnooze() {
           console.log('snoozed!', i);

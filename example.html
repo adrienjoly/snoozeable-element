@@ -8,7 +8,7 @@
 <body>
   <h1>CSS3 Animated Snooze</h1>
 
-  <div id="banner-gallery" class="gallery-module">
+  <div class="gallery-module">
     <div class="gallery-module__wrapper">
       <div class="gallery-module__slide">ITEM</div>
       <div class="gallery-module__slide">SNOOZE</div>
@@ -17,7 +17,8 @@
   <script src="snoozeable.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      SnoozeSwiper(window, document, function onSnooze() {
+      var bannerGallery = document.getElementsByClassName('gallery-module')[0];
+      SnoozeSwiper(bannerGallery, function onSnooze() {
         console.log('snoozed!');
       });
     });

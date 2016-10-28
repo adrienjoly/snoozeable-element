@@ -223,6 +223,126 @@ window.SnoozeSwiper = (function(window, document, undefined){
     return this;
   };
 
+  // === GALLERY CONTROL CLASS ===
+
+  var ItemClasses = {
+    hidden: 'is-hidden',
+    active: 'is-active',
+    animateIn: 'animate-in',
+    animateOut: 'animate-out'
+  };
+
+  var App = { active: 0 };
+
+  /*
+  * Reposition the gallery elements based on the size of the screen.
+  *
+  * @class GalleryControl
+  * @param {Object} opts
+  */
+  GalleryControl = function (opts) {
+    this.animating = false;
+    this.opts = opts;
+    this._init();
+  };
+  GalleryControl.prototype.trackSlides = function (dir, dist, callback) {
+    var self = this,
+      currPos = -(App.active * this.slideWidth),
+      translateX = ('left' === dir) ? parseFloat(currPos - dist) : parseFloat(currPos + dist),
+      wrapper = this.wrapper[0];
+    wrapper.style[this.prefix] = 'translate(' + translateX + 'px, 0)';
+    if ('function' === typeof callback) {
+      callback();
+    }
+  };
+  GalleryControl.prototype.animateSlides = function (next, speed) {
+    var self = this,
+      next = next || 0,
+      speed = speed || false,
+      max = this.slides.length,
+      wrapper = this.wrapper[0],
+      translateX = (next * this.slideWidth),
+      speedPrefix = getPrefix(['webkitTransitionDuration', 'MSTransitionDuration', 'oTransitionDuration', 'transitionDuration']),
+      // We know that the heading and icon animations take 0.5s to complete...
+      // So we need to make sure the next animation can't be initiated before everything has finished the animation cycle.
+      // What we are doing is minusing the swipe speed from the CSS transition speed.
+      // I know... the implementation is a little stinky...
+      timeout = speed ? (0.5 - speed).toString().replace('.', '').slice(0, 4) : 1;
+    // Make sure the app isn't currently animating...
+    // And that the new position doesn't equal the current position.
+    if (('translate(-' + translateX + 'px, 0)' !== wrapper.style[this.prefix])) {
+      this.animating = true;
+      this.listener.addEvent(wrapper, function transition() {
+        // Remove the transition property.
+        wrapper.style[speedPrefix] = '';
+        // Remove the event.
+        self.listener.removeEvent(wrapper, transition);
+        // Remove the active class.
+        wrapper.classList.remove(ItemClasses.active);
+        // Reset the App.animating property...
+        // Add a slight delay to stop any chaining.
+        setTimeout(function () {
+          self.animating = false;
+        }, parseFloat(timeout));
+      });
+      // Toggle the slide styles.
+      while (max--) {
+        this.slides[max].classList.remove(ItemClasses.active);
+      }
+      this.slides[next].classList.add(ItemClasses.active);
+      // Change the wrapper styles.
+      wrapper.classList.add(ItemClasses.active);
+      wrapper.style[this.prefix] = 'translate(-' + translateX + 'px, 0)';
+      if (speed) {
+        wrapper.style[speedPrefix] = speed + 's';
+      }
+    }
+  };
+  GalleryControl.prototype.fixSlideDimensions = function (active) {
+    var max = this.slides.length,
+      wrapper = this.wrapper[0];
+    // Reset the function properties.
+    this._config();
+    // Set the wrapper dimensions.
+    this.element.style.height = this.slideHeight + 'px';
+    wrapper.style.width = (this.slideWidth * max) + 'px';
+    wrapper.style.height = this.slideHeight + 'px';
+    wrapper.style.marginLeft = (this.elementWidth / 2) - (this.slideWidth / 2) + 'px';
+    // Set the slide dimensions.
+    while (max--) {
+      var slide = this.slides[max];
+      slide.style.width = this.slideWidth + 'px';
+      slide.style.height = this.slideHeight + 'px';
+    }
+    wrapper.style[this.prefix] = 'translate(-' + (active * this.slideWidth) + 'px, 0)';
+  };
+  GalleryControl.prototype._config = function () {
+    this.prefix = getPrefix(['transform', 'WebkitTransform']);
+    this.elementWidth = parseInt(fetchComputedStyle(this.element, 'width'));
+    this.slideWidth = ((this.elementWidth >= 1024) && ('landscape' === fetchComputedStyle(document.body, 'content', ':before'))) ? 640 : this.elementWidth;
+    this.slideHeight = parseFloat(calculateAspectRatio(this.slideWidth, null));
+  };
+  GalleryControl.prototype._init = function () {
+    var self = this;
+    // Set the function properties.
+    this.element = this.opts.element;
+    this.wrapper = this.element.querySelectorAll(this.opts.wrapper);
+    this.slides = this.element.querySelectorAll(this.opts.slides);
+    this.listener = new CSSListeners({
+      type: 'transition',
+      prefixes: {
+        'WebkitTransition': 'webkitTransitionEnd',
+        'MozTransition': 'transitionend',
+        'OTransition': 'oTransitionEnd',
+        'msTransition': 'MSTransitionEnd',
+        'transition': 'transitionEnd'
+      }
+    });
+    // Run the function methods.
+    this.fixSlideDimensions(0);
+    return this;
+  };
+
   // === MAIN COMPONENT LOGIC ===
 
   return function(bannerGallery, onSnoozeFct) {
@@ -230,15 +350,8 @@ window.SnoozeSwiper = (function(window, document, undefined){
     var App = {};
     App.slideCount = 2;
     App.active = 0;
-    App.animating = false;
 
-    App.classes = {
-      hidden: 'is-hidden',
-      active: 'is-active',
-      animateIn: 'animate-in',
-      animateOut: 'animate-out'
-    };
-
+    /*
     App.setActive = function (dir) {
       var dir = dir || 'left',
         active;
@@ -256,118 +369,11 @@ window.SnoozeSwiper = (function(window, document, undefined){
       }
       return App.active;
     };
-
-    /*
-    * Reposition the gallery elements based on the size of the screen.
-    *
-    * @class GalleryControl
-    * @param {Object} opts
     */
-    App.GalleryControl = function (opts) {
-      this.opts = opts;
-      this._init();
-    };
-    App.GalleryControl.prototype.trackSlides = function (dir, dist, callback) {
-      var self = this,
-        currPos = -(App.active * this.slideWidth),
-        translateX = ('left' === dir) ? parseFloat(currPos - dist) : parseFloat(currPos + dist),
-        wrapper = this.wrapper[0];
-      wrapper.style[this.prefix] = 'translate(' + translateX + 'px, 0)';
-      if ('function' === typeof callback) {
-        callback();
-      }
-    };
-    App.GalleryControl.prototype.animateSlides = function (next, speed) {
-      var self = this,
-        next = next || 0,
-        speed = speed || false,
-        max = this.slides.length,
-        wrapper = this.wrapper[0],
-        translateX = (next * this.slideWidth),
-        speedPrefix = getPrefix(['webkitTransitionDuration', 'MSTransitionDuration', 'oTransitionDuration', 'transitionDuration']),
-        // We know that the heading and icon animations take 0.5s to complete...
-        // So we need to make sure the next animation can't be initiated before everything has finished the animation cycle.
-        // What we are doing is minusing the swipe speed from the CSS transition speed.
-        // I know... the implementation is a little stinky...
-        timeout = speed ? (0.5 - speed).toString().replace('.', '').slice(0, 4) : 1;
-      // Make sure the app isn't currently animating...
-      // And that the new position doesn't equal the current position.
-      if (('translate(-' + translateX + 'px, 0)' !== wrapper.style[this.prefix])) {
-        App.animating = true;
-        this.listener.addEvent(wrapper, function transition() {
-          // Remove the transition property.
-          wrapper.style[speedPrefix] = '';
-          // Remove the event.
-          self.listener.removeEvent(wrapper, transition);
-          // Remove the active class.
-          wrapper.classList.remove(App.classes.active);
-          // Reset the App.animating property...
-          // Add a slight delay to stop any chaining.
-          setTimeout(function () {
-            App.animating = false;
-          }, parseFloat(timeout));
-        });
-        // Toggle the slide styles.
-        while (max--) {
-          this.slides[max].classList.remove(App.classes.active);
-        }
-        this.slides[next].classList.add(App.classes.active);
-        // Change the wrapper styles.
-        wrapper.classList.add(App.classes.active);
-        wrapper.style[this.prefix] = 'translate(-' + translateX + 'px, 0)';
-        if (speed) {
-          wrapper.style[speedPrefix] = speed + 's';
-        }
-      }
-    };
-    App.GalleryControl.prototype.fixSlideDimensions = function (active) {
-      var max = this.slides.length,
-        wrapper = this.wrapper[0];
-      // Reset the function properties.
-      this._config();
-      // Set the wrapper dimensions.
-      this.element.style.height = this.slideHeight + 'px';
-      wrapper.style.width = (this.slideWidth * max) + 'px';
-      wrapper.style.height = this.slideHeight + 'px';
-      wrapper.style.marginLeft = (this.elementWidth / 2) - (this.slideWidth / 2) + 'px';
-      // Set the slide dimensions.
-      while (max--) {
-        var slide = this.slides[max];
-        slide.style.width = this.slideWidth + 'px';
-        slide.style.height = this.slideHeight + 'px';
-      }
-      wrapper.style[this.prefix] = 'translate(-' + (active * this.slideWidth) + 'px, 0)';
-    };
-    App.GalleryControl.prototype._config = function () {
-      this.prefix = getPrefix(['transform', 'WebkitTransform']);
-      this.elementWidth = parseInt(fetchComputedStyle(this.element, 'width'));
-      this.slideWidth = ((this.elementWidth >= 1024) && ('landscape' === fetchComputedStyle(document.body, 'content', ':before'))) ? 640 : this.elementWidth;
-      this.slideHeight = parseFloat(calculateAspectRatio(this.slideWidth, null));
-    };
-    App.GalleryControl.prototype._init = function () {
-      var self = this;
-      // Set the function properties.
-      this.element = this.opts.element;
-      this.wrapper = this.element.querySelectorAll(this.opts.wrapper);
-      this.slides = this.element.querySelectorAll(this.opts.slides);
-      this.listener = new CSSListeners({
-        type: 'transition',
-        prefixes: {
-          'WebkitTransition': 'webkitTransitionEnd',
-          'MozTransition': 'transitionend',
-          'OTransition': 'oTransitionEnd',
-          'msTransition': 'MSTransitionEnd',
-          'transition': 'transitionEnd'
-        }
-      });
-      // Run the function methods.
-      this.fixSlideDimensions(0);
-      return this;
-    };
 
     var
       windowChange = new WindowListeners(),
-      bannerGalleryFn = new App.GalleryControl({
+      bannerGalleryFn = new GalleryControl({
         element: bannerGallery,
         wrapper: '.gallery-module__wrapper',
         slides: '.gallery-module__slide'
@@ -376,13 +382,13 @@ window.SnoozeSwiper = (function(window, document, undefined){
         element: document.body,
         trackingCallback: function (dir, dist, currPos, startPos, time) {
           var self = this;
-          if (!App.animating) {
+          if (!bannerGalleryFn.animating) {
             // Create a callback to determine whether the user has tracked enough to move onto the next slide.
             bannerGalleryFn.trackSlides(dir, dist, function callback() { });
           }
         },
         swipeSuccessCallback: function (dir, dist, time) {
-          if (!App.animating) {
+          if (!bannerGalleryFn.animating) {
             var width = bannerGalleryFn.slideWidth,
               offsetDist = (dist * 1.66),
               speed = (offsetDist / time) / 10;
@@ -390,7 +396,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
             // Or that the swipe distance is greater than the half of the slide width.
             if (offsetDist > time || (dist > (width / 2))) {
               var prev = App.active,
-                next = App.setActive(dir);
+                next = 'left' === dir ? 1 : 0; //App.setActive(dir);
               if (next !== prev) {
                 // Animate the gallery slides along...
                 // Only pass the speed property on fast or long swipes, else default to the value set up in the css.

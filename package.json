@@ -1,0 +1,28 @@
+{
+  "name": "snoozeable-element",
+  "version": "1.0.0",
+  "description": "Vanilla-JS+CSS component allowing a HTML element to be snoozed by swiping (touch events), similarly to Google Inbox for mobile",
+  "main": "snoozeable.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adrienjoly/snoozeable-element.git"
+  },
+  "keywords": [
+    "ui",
+    "dom",
+    "swipe",
+    "snooze",
+    "html",
+    "css",
+    "component"
+  ],
+  "author": "Adrien Joly",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adrienjoly/snoozeable-element/issues"
+  },
+  "homepage": "https://github.com/adrienjoly/snoozeable-element#readme"
+}

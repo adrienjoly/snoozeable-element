@@ -126,6 +126,103 @@ window.SnoozeSwiper = (function(window, document, undefined){
     return this;
   };
 
+
+  /*
+  * Listen out for swipes.
+  *
+  * @class FixGalleryDimensions
+  * @param {Object} opts
+  */
+  SwipeControl = function (opts) {
+    this.opts = opts;
+    this._init(opts);
+  };
+  SwipeControl.prototype.setListeners = function () {
+    var self = this,
+      hasTouch = 'ontouchstart' in window,
+      startEvent = hasTouch ? 'touchstart' : 'mousedown',
+      moveEvent = hasTouch ? 'touchmove' : 'mousemove',
+      endEvent = hasTouch ? 'touchend' : 'mouseup';
+    // Set the touch start event to track where the swipe originated.
+    this.element.addEventListener(startEvent, function (e) {
+      if (e.targetTouches && 1 === e.targetTouches.length || 'mousedown' === e.type) {
+        var eventObj = hasTouch ? e.targetTouches[0] : e;
+        // Set the start event related properties.
+        self.startTime = Date.now();
+        self.start = parseInt(eventObj.pageX);
+      }
+      // e.preventDefault();
+    }, false);
+    // Set the touch move event to track the swipe movement.
+    this.element.addEventListener(moveEvent, function (e) {
+      if (self.start && (e.targetTouches && 1 === e.targetTouches.length || 'mousemove' === e.type)) {
+        var eventObj = hasTouch ? e.targetTouches[0] : e;
+        // Set the current position related properties.
+        self.currTime = Date.now();
+        self.currPos = parseInt(eventObj.pageX);
+        self.trackSwipe();
+      }
+      e.preventDefault();
+    }, false);
+    // Set the touch end event to track where the swipe finished.
+    this.element.addEventListener(endEvent, function (e) {
+      var eventObj = hasTouch ? e.changedTouches[0] : e;
+      // Set the end event related properties.
+      self.endTime = Date.now();
+      self.end = parseInt(eventObj.pageX);
+      // Run the confirm swipe method.
+      self.confirmSwipe();
+      // e.preventDefault();
+    }, false);
+  };
+  SwipeControl.prototype.trackSwipe = function () {
+    var self = this;
+    // Overwrite the function properties.
+    this.direction = (this.start > this.currPos) ? 'left' : 'right';
+    this.trackDistance = ('left' === this.direction) ? (this.start - this.currPos) : (this.currPos - this.start);
+    // Run the tracking callback.
+    this.trackingCallback(this.direction, this.trackDistance, this.currPos, this.start, parseInt(this.currTime - this.startTime));
+  };
+  SwipeControl.prototype.confirmSwipe = function () {
+    var self = this;
+    // Set up the direction property.
+    this.direction = (this.start > this.end) ? 'left' : 'right';
+    // Set up the duration property.
+    this.duration = parseInt(this.endTime - this.startTime);
+    // Work out the distance based on the direction of the swipe.
+    this.swipeDistance = ('left' === this.direction) ? (this.start - this.end) : (this.end - this.start);
+    // This is where we determine whether it was a swipe or not.
+    this.swipeSuccessCallback(this.direction, this.swipeDistance, this.duration);
+    // Reset the variables.
+    this._config();
+  };
+  SwipeControl.prototype._config = function () {
+    this.start = null;
+    this.end = null;
+    this.trackDistance = null;
+    this.swipeDistance = null;
+    this.currPos = null;
+    this.startTime = null;
+    this.endTime = null;
+    this.currTime = null;
+    this.direction = null;
+    this.duration = null;
+  };
+  SwipeControl.prototype._init = function (opts) {
+    // Set the function properties.
+    this.element = this.opts.element;
+    this.swipeSuccessCallback = this.opts.swipeSuccessCallback || function (dir, dist, time) {
+      console.log(dir, dist, time);
+    };
+    this.trackingCallback = this.opts.trackingCallback || function (dir, dist, currPos, time) {
+      console.log(dir, dist, currPos, time);
+    };
+    // Run the function methods.
+    this._config();
+    this.setListeners();
+    return this;
+  };
+
   // === MAIN COMPONENT LOGIC ===
 
   return function(bannerGallery, onSnoozeFct) {
@@ -158,102 +255,6 @@ window.SnoozeSwiper = (function(window, document, undefined){
         }
       }
       return App.active;
-    };
-
-    /*
-    * Listen out for swipes.
-    *
-    * @class FixGalleryDimensions
-    * @param {Object} opts
-    */
-    App.SwipeControl = function (opts) {
-      this.opts = opts;
-      this._init(opts);
-    };
-    App.SwipeControl.prototype.setListeners = function () {
-      var self = this,
-        hasTouch = 'ontouchstart' in window,
-        startEvent = hasTouch ? 'touchstart' : 'mousedown',
-        moveEvent = hasTouch ? 'touchmove' : 'mousemove',
-        endEvent = hasTouch ? 'touchend' : 'mouseup';
-      // Set the touch start event to track where the swipe originated.
-      this.element.addEventListener(startEvent, function (e) {
-        if (e.targetTouches && 1 === e.targetTouches.length || 'mousedown' === e.type) {
-          var eventObj = hasTouch ? e.targetTouches[0] : e;
-          // Set the start event related properties.
-          self.startTime = Date.now();
-          self.start = parseInt(eventObj.pageX);
-        }
-        // e.preventDefault();
-      }, false);
-      // Set the touch move event to track the swipe movement.
-      this.element.addEventListener(moveEvent, function (e) {
-        if (self.start && (e.targetTouches && 1 === e.targetTouches.length || 'mousemove' === e.type)) {
-          var eventObj = hasTouch ? e.targetTouches[0] : e;
-          // Set the current position related properties.
-          self.currTime = Date.now();
-          self.currPos = parseInt(eventObj.pageX);
-          self.trackSwipe();
-        }
-        e.preventDefault();
-      }, false);
-      // Set the touch end event to track where the swipe finished.
-      this.element.addEventListener(endEvent, function (e) {
-        var eventObj = hasTouch ? e.changedTouches[0] : e;
-        // Set the end event related properties.
-        self.endTime = Date.now();
-        self.end = parseInt(eventObj.pageX);
-        // Run the confirm swipe method.
-        self.confirmSwipe();
-        // e.preventDefault();
-      }, false);
-    };
-    App.SwipeControl.prototype.trackSwipe = function () {
-      var self = this;
-      // Overwrite the function properties.
-      this.direction = (this.start > this.currPos) ? 'left' : 'right';
-      this.trackDistance = ('left' === this.direction) ? (this.start - this.currPos) : (this.currPos - this.start);
-      // Run the tracking callback.
-      this.trackingCallback(this.direction, this.trackDistance, this.currPos, this.start, parseInt(this.currTime - this.startTime));
-    };
-    App.SwipeControl.prototype.confirmSwipe = function () {
-      var self = this;
-      // Set up the direction property.
-      this.direction = (this.start > this.end) ? 'left' : 'right';
-      // Set up the duration property.
-      this.duration = parseInt(this.endTime - this.startTime);
-      // Work out the distance based on the direction of the swipe.
-      this.swipeDistance = ('left' === this.direction) ? (this.start - this.end) : (this.end - this.start);
-      // This is where we determine whether it was a swipe or not.
-      this.swipeSuccessCallback(this.direction, this.swipeDistance, this.duration);
-      // Reset the variables.
-      this._config();
-    };
-    App.SwipeControl.prototype._config = function () {
-      this.start = null;
-      this.end = null;
-      this.trackDistance = null;
-      this.swipeDistance = null;
-      this.currPos = null;
-      this.startTime = null;
-      this.endTime = null;
-      this.currTime = null;
-      this.direction = null;
-      this.duration = null;
-    };
-    App.SwipeControl.prototype._init = function (opts) {
-      // Set the function properties.
-      this.element = this.opts.element;
-      this.swipeSuccessCallback = this.opts.swipeSuccessCallback || function (dir, dist, time) {
-        console.log(dir, dist, time);
-      };
-      this.trackingCallback = this.opts.trackingCallback || function (dir, dist, currPos, time) {
-        console.log(dir, dist, currPos, time);
-      };
-      // Run the function methods.
-      this._config();
-      this.setListeners();
-      return this;
     };
 
     /*
@@ -371,7 +372,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
         wrapper: '.gallery-module__wrapper',
         slides: '.gallery-module__slide'
       }),
-      swipeListener = new App.SwipeControl({
+      swipeListener = new SwipeControl({
         element: document.body,
         trackingCallback: function (dir, dist, currPos, startPos, time) {
           var self = this;

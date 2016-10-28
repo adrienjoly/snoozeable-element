@@ -10,16 +10,26 @@
 
   <div class="gallery-module">
     <div class="gallery-module__wrapper">
-      <div class="gallery-module__slide">ITEM</div>
+      <div class="gallery-module__slide">ITEM 1</div>
       <div class="gallery-module__slide">SNOOZE</div>
     </div>
   </div>
+
+  <div class="gallery-module">
+    <div class="gallery-module__wrapper">
+      <div class="gallery-module__slide">ITEM 2</div>
+      <div class="gallery-module__slide">SNOOZE</div>
+    </div>
+  </div>
+
   <script src="snoozeable.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      var bannerGallery = document.getElementsByClassName('gallery-module')[0];
-      SnoozeSwiper(bannerGallery, function onSnooze() {
-        console.log('snoozed!');
+      var items = document.getElementsByClassName('gallery-module');
+      Array.prototype.forEach.call(items, function(item, i) {
+        SnoozeSwiper(item, function onSnooze() {
+          console.log('snoozed!', i);
+        });
       });
     });
   </script>

@@ -14,6 +14,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 window.SnoozeSwiper = (function(window, document, undefined){
 
+  // === HELPERS ===
+
   /*
    * Get the computed styles of any element.
    */
@@ -62,6 +64,44 @@ window.SnoozeSwiper = (function(window, document, undefined){
     return false;
   };
 
+  // === CLASSES ===
+
+
+  /*
+  * Set up the ability to listen out to CSS animation and transition events.
+  *
+  * @class CSSListeners
+  * @param {Object} opts
+  */
+  function CSSListeners (opts) {
+    this._init(opts);
+  };
+  CSSListeners.prototype.addEvent = function (el, cb) {
+    var self = this;
+    el.addEventListener(this.prefix, cb, false);
+  };
+  CSSListeners.prototype.removeEvent = function (el, cb) {
+    var self = this;
+    el.removeEventListener(this.prefix, cb, false);
+  };
+  CSSListeners.prototype._init = function (opts) {
+    var self = this;
+    this.opts = opts;
+    // By default we shall set up animation end listeners.
+    this.type = this.opts.type || 'animation';
+    // Set up the prefixes to default to the animation end browser prefixes.
+    this.prefixes = this.opts.prefixes || {
+      'WebkitAnimation': 'webkitAnimationEnd',
+      'OAnimation': 'oanimationend',
+      'MsAnimation': 'MSAnimationEnd',
+      'animation': 'animationend'
+    };
+    this.prefix = getPrefix(this.prefixes);
+    return this;
+  };
+
+  // === MAIN COMPONENT LOGIC ===
+
   return function(bannerGallery, onSnoozeFct) {
 
     var App = {};
@@ -92,39 +132,6 @@ window.SnoozeSwiper = (function(window, document, undefined){
         }
       }
       return App.active;
-    };
-
-    /*
-    * Set up the ability to listen out to CSS animation and transition events.
-    *
-    * @class CSSListeners
-    * @param {Object} opts
-    */
-    App.CSSListeners = function (opts) {
-      this._init(opts);
-    };
-    App.CSSListeners.prototype.addEvent = function (el, cb) {
-      var self = this;
-      el.addEventListener(this.prefix, cb, false);
-    };
-    App.CSSListeners.prototype.removeEvent = function (el, cb) {
-      var self = this;
-      el.removeEventListener(this.prefix, cb, false);
-    };
-    App.CSSListeners.prototype._init = function (opts) {
-      var self = this;
-      this.opts = opts;
-      // By default we shall set up animation end listeners.
-      this.type = this.opts.type || 'animation';
-      // Set up the prefixes to default to the animation end browser prefixes.
-      this.prefixes = this.opts.prefixes || {
-        'WebkitAnimation': 'webkitAnimationEnd',
-        'OAnimation': 'oanimationend',
-        'MsAnimation': 'MSAnimationEnd',
-        'animation': 'animationend'
-      };
-      this.prefix = getPrefix(this.prefixes);
-      return this;
     };
 
     /*
@@ -343,7 +350,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
       this.element = this.opts.element;
       this.wrapper = this.element.querySelectorAll(this.opts.wrapper);
       this.slides = this.element.querySelectorAll(this.opts.slides);
-      this.listener = new App.CSSListeners({
+      this.listener = new CSSListeners({
         type: 'transition',
         prefixes: {
           'WebkitTransition': 'webkitTransitionEnd',
@@ -405,6 +412,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
         }
       }),
       resizeTimer = null;
+
     // Listen out for 'orientationchange' or 'resize' events on the window.
     windowChange.addListener(function changed() {
       if (resizeTimer) {

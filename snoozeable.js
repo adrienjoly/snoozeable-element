@@ -232,8 +232,6 @@ window.SnoozeSwiper = (function(window, document, undefined){
     animateOut: 'animate-out'
   };
 
-  var App = { active: 0 };
-
   /*
   * Reposition the gallery elements based on the size of the screen.
   *
@@ -242,12 +240,13 @@ window.SnoozeSwiper = (function(window, document, undefined){
   */
   GalleryControl = function (opts) {
     this.animating = false;
+    this.active = 0; // active item/slide is always the first one
     this.opts = opts;
     this._init();
   };
   GalleryControl.prototype.trackSlides = function (dir, dist, callback) {
     var self = this,
-      currPos = -(App.active * this.slideWidth),
+      currPos = -(this.active * this.slideWidth),
       translateX = ('left' === dir) ? parseFloat(currPos - dist) : parseFloat(currPos + dist),
       wrapper = this.wrapper[0];
     wrapper.style[this.prefix] = 'translate(' + translateX + 'px, 0)';
@@ -347,8 +346,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
 
   return function(bannerGallery, onSnoozeFct) {
 
-    var App = {};
-    App.active = 0;
+    var active = 0;
 
     var
       windowChange = new WindowListeners(),
@@ -375,7 +373,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
             // Or that the swipe distance is greater than the half of the slide width.
             if (offsetDist > time || (dist > (width / 2))) {
               if ('left' === dir) {
-                var next = App.active + 1;
+                var next = active + 1;
                 // Animate the gallery slides along...
                 // Only pass the speed property on fast or long swipes, else default to the value set up in the css.
                 bannerGalleryFn.animateSlides(next, ((offsetDist > time) && (dist > (width / 2))) ? speed : false);
@@ -383,13 +381,13 @@ window.SnoozeSwiper = (function(window, document, undefined){
                 onSnoozeFct();
               } else {
                 // Animate the gallery slides back into place.
-                bannerGalleryFn.animateSlides(App.active);
+                bannerGalleryFn.animateSlides(active);
               }
             } else {
               // Make sure we have actually travelled.
               if (10 < dist) {
                 // Animate the gallery slides back into place.
-                bannerGalleryFn.animateSlides(App.active, null);
+                bannerGalleryFn.animateSlides(active, null);
               }
             }
           }
@@ -403,10 +401,9 @@ window.SnoozeSwiper = (function(window, document, undefined){
         clearTimeout(resizeTimer);
       }
       resizeTimer = setTimeout(function () {
-        bannerGalleryFn.fixSlideDimensions(App.active);
+        bannerGalleryFn.fixSlideDimensions(active);
       }, 250);
     });
-    //});
 
   };
 

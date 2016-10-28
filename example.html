@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CSS3 Animated Snooze Example</title>
+  <link rel="stylesheet" href="example.css">
+</head>
+<body>
+  <h1>CSS3 Animated Snooze</h1>
+
+  <div id="banner-gallery" class="gallery-module">
+    <div class="gallery-module__wrapper">
+      <div class="gallery-module__slide">ITEM</div>
+      <div class="gallery-module__slide">SNOOZE</div>
+    </div>
+  </div>
+  <script src="snoozeable.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      SnoozeSwiper(window, document, function onSnooze() {
+        console.log('snoozed!');
+      });
+    });
+  </script>
+</body>
+</html>

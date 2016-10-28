@@ -10,16 +10,24 @@
     }
     .item {
       max-width: 1024px;
-      padding: 12px 0;
       border-bottom: 1px solid #c6c6c6;
       font-weight: bold;
+      overflow: hidden;
+      max-height: 42px;
+      transition: max-height 0.5s;
+    }
+    .item > div {
+      padding: 12px 0;
+    }
+    .item.collapsed {
+      max-height: 0;
     }
   </style>
 </head>
 <body>
 
   <h1>Snoozeable items</h1>
-  
+
   <div id="items"></div>
 
   <script src="snoozeable.js"></script>
@@ -45,6 +53,10 @@
       Array.prototype.forEach.call(itemsElement.children, function(item, i) {
         SnoozeSwiper(item, function onSnooze() {
           console.log('snoozed!', ITEMS[i]);
+          item.classList.add('collapsed');
+          setTimeout(function() {
+            itemsElement.removeChild(item);
+          }, 500);
         });
       });
     });

@@ -348,6 +348,8 @@ window.SnoozeSwiper = (function(window, document, undefined){
 
     var active = 0;
 
+    element.classList.add('snoozeable-module');
+
     var
       windowChange = new WindowListeners(),
       snoozeableControl = new GalleryControl({

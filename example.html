@@ -3,29 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <title>CSS3 Animated Snooze Example</title>
-  <link rel="stylesheet" href="example.css">
+  <link rel="stylesheet" href="snoozeable.css">
 </head>
 <body>
-  <h1>CSS3 Animated Snooze</h1>
+  <h1>Snoozeable items</h1>
 
-  <div class="snoozeable-module">
-    <div class="snoozeable-module__wrapper">
-      <div class="snoozeable-module__slide">ITEM 1</div>
-      <div class="snoozeable-module__slide">SNOOZE</div>
-    </div>
-  </div>
+  <div id="items">
 
-  <div class="snoozeable-module">
-    <div class="snoozeable-module__wrapper">
-      <div class="snoozeable-module__slide">ITEM 2</div>
-      <div class="snoozeable-module__slide">SNOOZE</div>
+    <div class="item">
+      <div class="snoozeable-module__wrapper">
+        <div class="snoozeable-module__slide">ITEM 1</div>
+        <div class="snoozeable-module__slide snooze">SNOOZE</div>
+      </div>
     </div>
+
+    <div class="item">
+      <div class="snoozeable-module__wrapper">
+        <div class="snoozeable-module__slide">ITEM 2</div>
+        <div class="snoozeable-module__slide snooze">SNOOZE</div>
+      </div>
+    </div>
+
   </div>
 
   <script src="snoozeable.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      var items = document.getElementsByClassName('snoozeable-module');
+      var items = document.getElementById('items').children;
       Array.prototype.forEach.call(items, function(item, i) {
         SnoozeSwiper(item, function onSnooze() {
           console.log('snoozed!', i);

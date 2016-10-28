@@ -1,10 +1,5 @@
 .snoozeable-module {
   position: relative;
-  max-width: 1024px;
-  margin: 0 auto;
-  padding: 12px 0;
-  border-top: 1px solid #c6c6c6;
-  border-bottom: 1px solid #c6c6c6;
   overflow: hidden;
 }
 .snoozeable-module,
@@ -32,7 +27,6 @@
 .snoozeable-module .snoozeable-module__slide {
   float: left;
   display: block;
-  text-align: center;
 }
 .snoozeable-module .snoozeable-module__slide img {
   max-width: 100%;

@@ -24,22 +24,6 @@ window.SnoozeSwiper = (function(window, document, undefined){
   };
 
   /*
-   * Calculate the aspect ratio based on either a width or height value been passed.
-   */
-  function calculateAspectRatio(width, height, ar) {
-    var ar = ar ? ar : '1536:672',
-      arValues = ar.split(':'),
-      arWidth = parseInt(arValues[0]),
-      arHeight = parseInt(arValues[1]);
-    if (!width && height) {
-      return Math.ceil(height * (arWidth / arHeight));
-    }
-    if (!height && width) {
-      return Math.ceil(width / (arWidth / arHeight));
-    }
-  };
-
-  /*
    * Get the prefixed version of a CSS property.
    */
   function getPrefix(prefixes) {
@@ -303,15 +287,15 @@ window.SnoozeSwiper = (function(window, document, undefined){
     // Reset the function properties.
     this._config();
     // Set the wrapper dimensions.
-    this.element.style.height = this.slideHeight + 'px';
+    //this.element.style.height = this.slideHeight + 'px';
     wrapper.style.width = (this.slideWidth * max) + 'px';
-    wrapper.style.height = this.slideHeight + 'px';
+    //wrapper.style.height = this.slideHeight + 'px';
     wrapper.style.marginLeft = (this.elementWidth / 2) - (this.slideWidth / 2) + 'px';
     // Set the slide dimensions.
     while (max--) {
       var slide = this.slides[max];
       slide.style.width = this.slideWidth + 'px';
-      slide.style.height = this.slideHeight + 'px';
+      //slide.style.height = this.slideHeight + 'px';
     }
     wrapper.style[this.prefix] = 'translate(-' + (active * this.slideWidth) + 'px, 0)';
   };
@@ -319,7 +303,7 @@ window.SnoozeSwiper = (function(window, document, undefined){
     this.prefix = getPrefix(['transform', 'WebkitTransform']);
     this.elementWidth = parseInt(fetchComputedStyle(this.element, 'width'));
     this.slideWidth = ((this.elementWidth >= 1024) && ('landscape' === fetchComputedStyle(document.body, 'content', ':before'))) ? 640 : this.elementWidth;
-    this.slideHeight = parseFloat(calculateAspectRatio(this.slideWidth, null));
+    //this.slideHeight = parseFloat(calculateAspectRatio(this.slideWidth, null));
   };
   GalleryControl.prototype._init = function () {
     var self = this;

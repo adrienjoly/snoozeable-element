@@ -2,7 +2,7 @@
 
 Vanilla-JS+CSS component allowing a HTML element to be snoozed by swiping (touch events), similarly to Google Inbox for mobile
 
-[Demo on Codepen](http://codepen.io/adrienjoly/pen/BLZPjP?editors=1111)
+[Demo on Codepen](http://codepen.io/adrienjoly/pen/MJMReM)
 
 Forked of "[CSS3 Animated Swipe Gallery](http://codepen.io/mattjburrows/pen/GFCKL)" CodePen by Matthew Burrows 
 
